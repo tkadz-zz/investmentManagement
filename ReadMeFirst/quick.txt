@@ -1,0 +1,15 @@
+Company Table:
+    1. id
+    2. user_id
+
+    3. name
+    4. Phone
+    5. Email
+    6. Website
+    7. avatar
+    8. Address
+    9. Bio
+
+    10. LastUpdated
+...................................................
+
