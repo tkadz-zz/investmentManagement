@@ -3,6 +3,74 @@
 class Userview extends Users
 {
 
+    public function viewSetRates($type){
+        $rows = $this->GetInterestRatesByType($type);
+        foreach ($rows as $row){
+            ?>
+            <div class="border-left-success rounded shadow-sm">
+                <form method="POST" action="includes/updateRate.inc.php">
+                    <div class="card pt-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <b>Type: </b><lable><?= $row['type'] ?> term investment</lable>
+                                </div>
+                                <input name="type" value="<?= $row['type'] ?>" hidden>
+                                <div class="col-md-4">
+                                    <input name="percentage" min="1" value="<?= $row['percentage'] ?>"  class="form-control" type="number" placeholder="Please Provide current rate for <?= $row['type'] ?> term investment" required>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <b>Period: </b><lable><?= $row['period'] ?> Months</lable>
+                                </div>
+                                <div class="col-md-4">
+                                    <input name="period" min="1" value="<?= $row['period'] ?>"  class="form-control" type="number" placeholder="Please Provide withdrawal period for <?= $row['type'] ?> term investment" required>
+                                </div>
+
+
+                                <div class="col-md-3 pt-2">
+                                    <button type="reset" class="btn btn-warning btn-sm"><span class="fa fa-times-circle"></span></button>
+                                    <button name="btn_update_rate" type="submit" onclick="return confirm('Update <?= $row['type'] ?> term investment?')" class="btn btn-primary btn-sm">Update <?= $row['type'] ?> term Inve</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <?php
+        }
+    }
+
+    public function viewInvTableLoop(){
+        $rows = $this->GetInterestRates();
+        ?>
+        <label  -class="col-form-label">Investments Limits</label>
+        <table -id="datatable" class="table -table-bordered -dt-responsive -nowrap">
+        <thead>
+        <tr>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        foreach ($rows as $row){
+        ?>
+            <tr>
+                <td><strong><?= $row['type'] ?></strong></td>
+                <td><?= $row['percentage'] ?>% / <?= $row['period'] ?> months <span class="mdi mdi-arrow-up"></span></td>
+            </tr>
+
+        <?php
+        }
+        ?>
+        </tbody>
+        </table>
+        <?php
+    }
+
     public function viewMsgNavCountLoop($adminID){
         $rows = $this->GetActiveAdminMail($adminID);
         foreach ($rows as $row) {
@@ -415,32 +483,7 @@ class Userview extends Users
                                 <hr>
 
                                 <div class="form-group col-md-5">
-                                    <label  -class="col-form-label">Investments Limits</label>
-                                    <table -id="datatable" class="table -table-bordered -dt-responsive -nowrap">
-                                        <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th>Short Term</th>
-                                            <th>Medium Term</th>
-                                            <th>Long Term</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <!--<tr>
-                                            <td></td>
-                                            <td>$1000-$5000</td>
-                                            <td>$6000-$12000</td>
-                                            <td>$13000-$25000</td>
-                                        </tr>-->
-                                        <tr>
-                                            <td><strong>Profit R</strong></td>
-                                            <td>15% / 3 months <span class="mdi mdi-arrow-up"></span></td>
-                                            <td>30% / 6 months <span class="mdi mdi-arrow-up"></span></td>
-                                            <td>50% / 1 year <span class="mdi mdi-arrow-up"></span></td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-
+                                    <?php $this->viewInvTableLoop() ?>
                                 </div>
 
 
@@ -542,18 +585,8 @@ class Userview extends Users
 
     public function viewInvestmentForm($iuID){
         $rows = $this->GetAllInvestmentsByuiID($iuID);
-        if($rows[0]['type'] == 'short'){
-            $min = '1';
-            $max = '5000';
-        }
-        if($rows[0]['type'] == 'medium'){
-            $min = '1';
-            $max = '12000';
-        }
-        if($rows[0]['type'] == 'long'){
-            $min = '1';
-            $max = '25000';
-        }
+        $percentageRows = $this->GetInterestRatesByType($rows[0]['type']);
+        $min = 1;
         ?>
         <form method="post" action="includes/invest.inc.php">
             <div class="modal-body">
@@ -568,7 +601,7 @@ class Userview extends Users
                     <div class="col-md-12">
                         <label for="inputEmail4" class="col-form-label">Investment Amount</label>
                         <input name="iuID" value="<?php echo $iuID ?>" hidden>
-                        <input name="amount" type="number" min="<?php echo $min ?>" -max="<?php echo $max ?>" class="form-control" placeholder="Amount you wish to invest" required">
+                        <input name="amount" type="number" min="<?php echo $min ?>"  class="form-control" placeholder="Amount you wish to invest" required">
                     </div>
                 </div>
 
@@ -709,7 +742,11 @@ class Userview extends Users
                     ?>
                 </td>
                 <td><span class="badge badge-<?php echo $badge ?>"><?php echo $re ?></span></td>
-                <td><a href="requestDetails.php?rID=<?php echo $row['id'] ?>">More <span class="mdi mdi-arrow-right"></span></a></td>
+                <td>
+                    <?php if($_SESSION['role'] == 'admin'){ ?>
+                    <a href="requestDetails.php?rID=<?php echo $row['id'] ?>">More <span class="mdi mdi-arrow-right"></span></a>
+                    <?php } ?>
+                </td>
             </tr>
             <?php
         }
@@ -770,7 +807,10 @@ class Userview extends Users
         $investmentRows = $this->GetAllInvestmentsByuiID($iuID);
         $InvType = $investmentRows[0]['type'];
 
-        if($InvType == 'short'){
+        $percentageRows = $this->GetInterestRatesByType($InvType);
+        $period = $percentageRows[0]['period'] * 30;
+
+       /* if($InvType == 'short'){
             //90 days OR 3 months
             $period = 90;
         }
@@ -781,7 +821,7 @@ class Userview extends Users
         elseif($InvType == 'long'){
             //365 days OR 12 months OR 1 year
             $period = 365;
-        }
+        }*/
 
         $withdrwalDate =  date('Y-m-d', strtotime($rows[0]['withdrawInit']. ' + '.$period.' days'));
 
@@ -805,7 +845,10 @@ class Userview extends Users
     }
 
     public function CalcInvestProfitReturns($returns, $totalInvested, $invested, $InvType){
-        if($InvType == 'short'){
+
+        $percentageRow = $this->GetInterestRatesByType($InvType);
+        $percentage = $percentageRow[0]['percentage'];
+        /*if($InvType == 'short'){
             $percentage = 15;
         }
         elseif($InvType == 'medium'){
@@ -813,7 +856,7 @@ class Userview extends Users
         }
         elseif($InvType == 'long'){
             $percentage = 50;
-        }
+        }*/
 
         //Calculate investment Percentage for each user
         $one = ($invested / $totalInvested) * 100;
@@ -1058,56 +1101,22 @@ class Userview extends Users
     public function investmentTypeDetails($iuID){
         $rows = $this->GetAllInvestmentsByuiID($iuID);
         $InvType = $rows[0]['type'];
+        $percentageRows = $this->GetInterestRatesByType($InvType);
         ?>
         <div class="form-group">
-            <div class="pb-2" style="font-size: 13px"><strong><?php echo $InvType ?> Term Investment Constraints: </strong></div>
+            <div class="pb-2" style="font-size: 13px"><strong><?php echo $percentageRows[0]['type'] ?> Term Investment Constraints: </strong></div>
             <table -id="datatable" class="table table-bordered -dt-responsive -nowrap">
                 <thead>
                 <tr>
-                    <?php
-                    if($InvType == 'short'){
-                        ?>
-                        <th>Short Term</th>
-                        <?php
-                    }
-                    elseif($InvType == 'medium'){
-                        ?>
-                        <th>Medium Term</th>
-                        <?php
-                    }
-                    elseif($InvType == 'long'){
-                        ?>
-                        <th>Long Term</th>
-                        <?php
-                    }
-                    ?>
+                    <th><?= $percentageRows[0]['type'] ?></th>
                 </tr>
                 </thead>
                 <tbody>
 
                 <tr>
                     <td><strong>Profit Returns</strong></td>
-                    <?php
-                    if($InvType == 'short'){
-                        ?>
-                        <td>15% / 3 months <span class="mdi mdi-arrow-up"></span></td>
-                        <?php
-                    }
 
-                    if($InvType == 'medium'){
-                        ?>
-                        <td>30% / 6 months <span class="mdi mdi-arrow-up"></span></td>
-                        <?php
-                    }
-
-                    if($InvType == 'long'){
-                        ?>
-                        <td>50% / 1 year <span class="mdi mdi-arrow-up"></span></td>
-                        <?php
-                    }
-                    ?>
-
-
+                    <td><?php echo $percentageRows[0]['percentage'] ?>% / <?php echo $percentageRows[0]['period'] ?> months <span class="mdi mdi-arrow-up"></span></td>
                 </tr>
                 </tbody>
             </table>

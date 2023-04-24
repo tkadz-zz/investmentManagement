@@ -3,6 +3,20 @@
 
 class Users extends Dbh{
 
+    protected function upateRates($type, $percentage, $period){
+        $sql = "UPDATE interest SET percentage=?, period=? WHERE type=?";
+        $stmt = $this->con()->prepare($sql);
+        if($stmt->execute([$percentage, $period, $type])){
+            $_SESSION['type'] = 's';
+            $_SESSION['err'] = $type .' term investment updated';
+            echo "<script type='text/javascript'>;
+                      window.location='../interests.php';
+                    </script>";
+        }else{
+            $this->opps();
+        }
+    }
+
     protected function delMsg($msgID){
         $sql = "DELETE FROM messages WHERE id=?";
         $stmt = $this->con()->prepare($sql);
@@ -1039,6 +1053,20 @@ class Users extends Dbh{
         $history_bus_date_variable = $mydate;
         $history_bus_date_tostring = strtotime($history_bus_date_variable);
         return date('l j F Y H:m:s A',$history_bus_date_tostring);
+    }
+
+    protected function GetInterestRates(){
+        $sql = "SELECT * FROM interest";
+        $stmt = $this->con()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    protected function GetInterestRatesByType($InvType){
+        $sql = "SELECT * FROM interest WHERE type=?";
+        $stmt = $this->con()->prepare($sql);
+        $stmt->execute([$InvType]);
+        return $stmt->fetchAll();
     }
 
     protected function GetCountView($query){

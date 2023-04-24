@@ -3,7 +3,7 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <ul class="nav">
 
-        <li class="nav-item nav-category">My Class Tabs</li>
+        <li class="nav-item nav-category">Main</li>
         <li class="nav-item">
             <a class="nav-link" href="dashboard.php">
                 <i class="menu-icon mdi mdi-view-dashboard"></i>
@@ -11,6 +11,19 @@
                 <i class="menu-arrow"></i>
             </a>
         </li>
+        <?php
+        if($_SESSION['role'] == 'admin'){
+            ?>
+            <li class="nav-item">
+                <a class="nav-link" href="interests.php">
+                    <i class="menu-icon mdi mdi-cash-usd"></i>
+                    <span class="menu-title">Interest Rates</span>
+                    <i class="menu-arrow"></i>
+                </a>
+            </li>
+            <?php
+        }
+        ?>
         <li class="nav-item nav-category">Profile and Security</li>
         <li class="nav-item">
             <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">

@@ -48,31 +48,11 @@
                             </div>
 
                             <div class="form-group col-md-5">
-                                <label  -class="col-form-label">Investments Limits</label>
-                                <table -id="datatable" class="table -table-bordered -dt-responsive -nowrap">
-                                    <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th>Short Term</th>
-                                            <th>Medium Term</th>
-                                            <th>Long Term</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td></td>
-                                            <td>$1000-$5000</td>
-                                            <td>$6000-$12000</td>
-                                            <td>$13000-$25000</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Profit R</strong></td>
-                                            <td>10% / 3 months <span class="mdi mdi-arrow-up"></span></td>
-                                            <td>20% / 6 months <span class="mdi mdi-arrow-up"></span></td>
-                                            <td>30% / 1 year <span class="mdi mdi-arrow-up"></span></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+
+                                <?php
+                                $c = new Userview();
+                                $c->viewInvTableLoop();
+                                ?>
 
                             </div>
                         </div>

@@ -1,6 +1,11 @@
 <?php
 class Usercontr extends Users{
 
+    public function upateRates($type, $percentage, $period)
+    {
+        parent::upateRates($type, $percentage, $period);
+    }
+
 
     public function delMsg($msgID)
     {
