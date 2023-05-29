@@ -4,6 +4,11 @@ include("autoloader.inc.php");
 if(isset($_POST['btn_addDoc'])) {
     $iuID = $_GET['iuID'];
     
+    $occupation = $_POST['occupation'];
+    $netWorth = $_POST['netWorth'];
+    $nationalID = $_POST['nationalID'];
+    $age = $_POST['age'];
+
     $title = $_POST['title'];
     $description = $_POST['description'];
     
@@ -32,7 +37,7 @@ if(isset($_POST['btn_addDoc'])) {
                 try {
                     $dateAdded = date("Y-m-d h:m:i");
                     $s = new Usercontr();
-                    $s->addDoc($title, $description, $iuID, $_SESSION['id'], $file_tmp, $file_destination, $file_name_new, $file_ext);
+                    $s->addDoc($title, $description, $iuID, $_SESSION['id'], $file_tmp, $file_destination, $file_name_new, $file_ext, $occupation, $netWorth, $nationalID, $age);
                 } catch (TypeError $e) {
                     echo "Error" . $e->getMessage();
 

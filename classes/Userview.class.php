@@ -541,8 +541,6 @@ class Userview extends Users
         }
         $totalInvested = $this->countTotalnv($iuID);
 
-        $returns = $rows[0]['returns'];
-        $invested = $investedRows[0]['amount'];
 
         $returns = $rows[0]['returns'];
         $invested = $investedRows[0]['amount'];
@@ -617,6 +615,7 @@ class Userview extends Users
 
     public function ViewRequestDetails($rID){
         $rows = $this->GetRequestsByID($rID);
+        $docRows = $this->GetDocs($rows[0]['iuID'], $rows[0]['userID']);
         $investorRows = $this->GetInvestorByID($rows[0]['userID']);
         $investmentRows = $this->GetAllInvestmentsByuiID($rows[0]['iuID']);
 
@@ -642,6 +641,10 @@ class Userview extends Users
                         <hr>
                         <div class="pb-3" style="font-size: 13px"><strong>Investment ID: </strong><span><a href="invetsmentDetails.php?iuID=<?php echo $rows[0]['iuID'] ?>"><?php echo $rows[0]['iuID'] ?></a></span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Request From: </strong><span><a href="userProfile.php?userID=<?php echo $rows[0]['userID'] ?>"><?php echo $investorRows[0]['name'] .' '. $investorRows[0]['surname'] ?></a></span></div>
+                        <div class="pb-3" style="font-size: 13px"><strong>National ID: </strong><span><?= $docRows[0]['nationalID'] ?></span></div>
+                        <div class="pb-3" style="font-size: 13px"><strong>Occupation: </strong><span><span><?= $docRows[0]['occupation'] ?></span></div>
+                        <div class="pb-3" style="font-size: 13px"><strong>Age: </strong><span></span><span><?= $docRows[0]['age'] ?></div>
+                        <div class="pb-3" style="font-size: 13px"><strong>Net Worth: </strong><span><span><?= $docRows[0]['netWorth'] ?></span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Requested On: </strong><span><?php echo $this->dateToDay($rows[0]['dateAdded'] ) ?> (<?php echo $this->timeAgo($rows[0]['dateAdded']) ?>)</span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Request Status: </strong><span class="badge badge-<?php echo $badge ?>"><?php echo $re ?></span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Date Responded: </strong>
@@ -828,7 +831,7 @@ class Userview extends Users
 
 
         ?>
-        <span style="font-size: 13px" class="card-description">Next Withdrawal On: <?php echo $this->dateToDay($withdrwalDate) ?></span><br>
+        <span style="font-size: 13px" class="card-description">Withdrawal On: <?php echo $this->dateToDay($withdrwalDate) ?></span><br>
         <span style="font-size: 13px" class="card-description">Time Left : <?php echo $this->timeTogo($withdrwalDate) ?></span><br>
 
         <?php
@@ -848,6 +851,8 @@ class Userview extends Users
 
         $percentageRow = $this->GetInterestRatesByType($InvType);
         $percentage = $percentageRow[0]['percentage'];
+        $period = $percentageRow[0]['period'];
+
         /*if($InvType == 'short'){
             $percentage = 15;
         }
@@ -858,14 +863,21 @@ class Userview extends Users
             $percentage = 50;
         }*/
 
+
+
         //Calculate investment Percentage for each user
-        $one = ($invested / $totalInvested) * 100;
+        //$one = ($invested / $totalInvested) * 100;
 
         //calculate amount of each investment Percentage Found
-        $two = ($one/100) * $returns;
+        //$two = ($one/100) * $returns;
 
         //Calculate Percent respective to invType
-        $three = ($percentage/100) * $two;
+        //$three = ($percentage/100) * $two;
+
+        $one = ($percentage/100) * $invested;
+        $two = $one + $invested;
+        $three = $two * $period;
+
 
         return round($three, 2);
     }
@@ -903,9 +915,9 @@ class Userview extends Users
         $rows = $this->GetAllInvestmentsByuiID($iuID);
         if(count($rows) > 0){
             $investedRows = $this->GetInvestedByiuIDandUserID($iuID, $userID);
-            if(count($investedRows) > 0){
-                $investorRows = $this->GetInvestorByID($investedRows[0]['userID']);
-            }
+
+            $investorsRows = $this->GetAllInvestedByIUID($iuID);
+
             $totalInvested = $this->countTotalnv($iuID);
 
             if($rows[0]['returns'] > $totalInvested){
@@ -960,7 +972,7 @@ class Userview extends Users
                             <div class="row">
                                 <div class="col-md-6">
 
-                                    <div class="pb-2" style="font-size: 13px"><strong>Current Investors: </strong><span><?php echo count($investedRows) ?></span></div>
+                                    <div class="pb-2" style="font-size: 13px"><strong>Current Investors: </strong><span><?php echo count($investorsRows) ?></span></div>
                                     <div class="pb-2" style="font-size: 13px"><strong>Total Invested: </strong><span>$<?php echo $totalInvested ?></span></div>
                                     <div class="pb-2" style="font-size: 13px"><strong>Total Returns: </strong><strong class="text-<?php echo $ret ?>">$<?php echo $rows[0]['returns'] ?><span class="mdi mdi-arrow-<?php echo $arrow ?>"></span> </strong></div>
 

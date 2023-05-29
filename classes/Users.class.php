@@ -163,12 +163,14 @@ class Users extends Dbh{
         $sql = "DELETE FROM invested WHERE iuID=? AND userID=?";
         $sql1 = "DELETE FROM withdraw WHERE iuID=? AND userID=?";
         $sql2 = "DELETE FROM request WHERE iuID=? AND userID=?";
+        $sql3 = "DELETE FROM docs WHERE iuID=? AND userID=?";
 
         $stmt = $this->con()->prepare($sql);
         $stmt1 = $this->con()->prepare($sql1);
         $stmt2 = $this->con()->prepare($sql2);
+        $stmt3 = $this->con()->prepare($sql3);
 
-        if($stmt->execute([$iuID, $userID]) AND $stmt1->execute([$iuID, $userID]) AND $stmt2->execute([$iuID, $userID])){
+        if($stmt->execute([$iuID, $userID]) AND $stmt1->execute([$iuID, $userID]) AND $stmt2->execute([$iuID, $userID]) AND $stmt3->execute([$iuID, $userID])){
             $_SESSION['type'] = 's';
             $_SESSION['err'] = 'Investment Termination Successful';
             echo "<script type='text/javascript'>;
@@ -205,7 +207,10 @@ class Users extends Dbh{
         $sql1 = "UPDATE invested SET withdrawInit=? WHERE userID=? AND iuID=?";
         $stmt1 = $this->con()->prepare($sql1);
 
-        if($stmt->execute([$userID, $iuID, $amount, $today]) AND $stmt1->execute([$today, $userID, $iuID])){
+        $sql2  = "DELETE FROM invested WHERE userID=? AND iuID=?";
+        $stmt2 = $this->con()->prepare($sql2);
+
+        if($stmt->execute([$userID, $iuID, $amount, $today]) AND $stmt1->execute([$today, $userID, $iuID]) AND $stmt2->execute([$userID, $iuID])){
             $_SESSION['type'] = 's';
             $_SESSION['err'] = 'Withdrawal of $'.$amount.' on Investment ID '.$iuID.' was Successful';
             echo "<script type='text/javascript'>;
@@ -692,80 +697,46 @@ class Users extends Dbh{
         }
     }
 
-    protected function addDoc($title, $description, $iuID, $userUD, $file_tmp, $file_destination, $file_name_new, $file_ext){
-        if(move_uploaded_file($file_tmp, $file_destination)){
-            $filed = '../documents/'.$file_name_new.'';
-            $sql = "INSERT INTO docs(title, description, iuID, userID, source, ext)
-                    VALUES(?,?,?,?,?,?)";
-            $stmt = $this->con()->prepare($sql);
-            $stmt->execute([$title, $description, $iuID, $userUD, $filed, $file_ext]);
-            if($stmt){
-                $_SESSION['type'] = 's';
-                $_SESSION['err'] = 'Document Added Successfully';
-                echo "<script>
+    protected function addDoc($title, $description, $iuID, $userUD, $file_tmp, $file_destination, $file_name_new, $file_ext, $occupation, $netWorth, $nationalID, $age){
+        if($age < 18){
+            $_SESSION['type'] = 'w';
+            $_SESSION['err'] = 'Your investment Proposal has been rejected';
+            echo "<script>
+                    window.location='../dashboard.php';
+                </script>";
+        }
+        elseif($age >= 18){
+            if (move_uploaded_file($file_tmp, $file_destination)) {
+                $filed = '../documents/' . $file_name_new . '';
+                $sql = "INSERT INTO docs(title, description, iuID, userID, source, ext, occupation, netWorth, nationalID, age)
+                    VALUES(?,?,?,?,?,?,?,?,?,?)";
+                $stmt = $this->con()->prepare($sql);
+                $stmt->execute([$title, $description, $iuID, $userUD, $filed, $file_ext, $occupation, $netWorth, $nationalID, $age]);
+                if ($stmt) {
+                    $_SESSION['type'] = 's';
+                    $_SESSION['err'] = 'Request Added Successfully';
+                    echo "<script>
                     window.location='../requestInvestment.php?iuID=$iuID';
                 </script>";
-            }
-            else{
+                } else {
+                    $_SESSION['type'] = 'w';
+                    $_SESSION['err'] = 'Opps! Something went wrong while uploading the Document- level2';
+                    echo "<script>
+                    history.back(-1);
+                </script>";
+                }
+            } else {
+                //Failed to move. Probably file destination permissions
                 $_SESSION['type'] = 'w';
-                $_SESSION['err'] = 'Opps! Something went wrong while uploading the Document- level2';
+                $_SESSION['err'] = 'Opps! Something went wrong while uploading the Document- level1';
                 echo "<script>
                     history.back(-1);
                 </script>";
             }
         }
-        else{
-            //Failed to move. Probably file destination permissions
-            $_SESSION['type'] = 'w';
-            $_SESSION['err'] = 'Opps! Something went wrong while uploading the Document- level1';
-            echo "<script>
-                    history.back(-1);
-                </script>";
-        }
 
     }
 
-    protected function addDiagnosis($bloodPressure, $pulse, $glucose, $gcs, $temp, $weight, $height, $diagnosis, $additional, $duID, $doctorID, $dateAdded, $userID){
-        $sql = "INSERT INTO diagnosis (userID, doctorID, duID, bloodPressure, pulse, glucose, gcs, temp, weight, height, diagnosis, additional, dateAdded)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        $stmt = $this->con()->prepare($sql);
-        if($stmt->execute([$userID, $doctorID, $duID, $bloodPressure, $pulse, $glucose, $gcs, $temp, $weight, $height, $diagnosis, $additional, $dateAdded])){
-            $_SESSION['type'] = 's';
-            $_SESSION['err'] = 'Diagnosis Added to database Successfully';
-            echo "<script type='text/javascript'>
-                        window.location='../uploadDocs.php?duID=$duID';
-                      </script>";
-        }
-        else{
-            $_SESSION['type'] = 'w';
-            $_SESSION['err'] = 'Opps! Something went wrong. Contact admin';
-            echo "<script type='text/javascript'>
-                        history.back(-1);
-                      </script>";
-        }
-    }
-
-    protected function updatePatientDetails($name, $surname, $nationalID, $dob, $sex, $phone, $address, $medicalName, $medicalPlan, $nokname, $noksurname, $nokPhone, $userid){
-        //check if patient exist. The following function will redirect to previous page if userID is not found in the databae avoiding future errors
-        $this->GetPatientByID($userid);
-        $sql = "UPDATE patient SET name=?, surname=?, nationalID=?, sex=?, dob=?, address=?, phone=?, nextOfKinName=?, nextOfKinSurname=?, nextOfKinPhone=?, medicalAid=?, medicalAidPlan=? WHERE userID=?";
-        $stmt = $this->con()->prepare($sql);
-        if($stmt->execute([$name, $surname, $nationalID, $sex, $dob, $address, $phone, $nokname, $noksurname, $nokPhone, $medicalName, $medicalPlan, $userid])){
-            $_SESSION['type'] = 's';
-            $_SESSION['err'] = 'Patient Account ('.$name.' '.$surname.') Updated Successfully';
-            echo "<script type='text/javascript'>
-                        window.location='../patientSetup.php?userid=$userid';
-                      </script>";
-        }
-        else{
-            $_SESSION['type'] = 'w';
-            $_SESSION['err'] = 'Opps! Something went wrong. Contact admin';
-            echo "<script type='text/javascript'>
-                        history.back(-1);
-                      </script>";
-        }
-
-    }
 
 
 
@@ -1062,6 +1033,8 @@ class Users extends Dbh{
         return $stmt->fetchAll();
     }
 
+
+
     protected function GetInterestRatesByType($InvType){
         $sql = "SELECT * FROM interest WHERE type=?";
         $stmt = $this->con()->prepare($sql);
@@ -1109,6 +1082,13 @@ class Users extends Dbh{
         $sql = "SELECT * FROM invested WHERE userID=?";
         $stmt = $this->con()->prepare($sql);
         $stmt->execute([$id]);
+        return $stmt->fetchAll();
+    }
+
+    protected function GetAllInvestedByIUID($iuid){
+        $sql = "SELECT * FROM invested WHERE iuID=?";
+        $stmt = $this->con()->prepare($sql);
+        $stmt->execute([$iuid]);
         return $stmt->fetchAll();
     }
 

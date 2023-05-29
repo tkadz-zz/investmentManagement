@@ -146,9 +146,9 @@ class Usercontr extends Users{
         parent::deleteDoc($docID, $iuID, $userID);
     }
 
-    public function addDoc($title, $description, $iuID, $UserUD, $file_tmp, $file_destination, $file_name_new, $file_ext)
+    public function addDoc($title, $description, $iuID, $UserUD, $file_tmp, $file_destination, $file_name_new, $file_ext, $occupation, $netWorth, $nationalID, $age)
     {
-        parent::addDoc($title, $description, $iuID, $UserUD, $file_tmp, $file_destination, $file_name_new, $file_ext);
+        parent::addDoc($title, $description, $iuID, $UserUD, $file_tmp, $file_destination, $file_name_new, $file_ext, $occupation, $netWorth, $nationalID, $age);
     }
 
     public function addDiagnosis($bloodPressure, $pulse, $glucose, $gcs, $temp, $weight, $height, $diagnosis, $additional, $duID, $doctorID, $dateAdded, $userID)

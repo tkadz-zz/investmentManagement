@@ -22,7 +22,30 @@ include 'includes/miniTab.inc.php';
                     <div class="list-group list-group-flush">
                         <form class="form-group" method="POST" action="includes/addDocs.inc.php?iuID=<?php echo $_GET['iuID'] ?>" enctype="multipart/form-data">
 
-                            <h5>Upload Necessary Documents Here</h5>
+                            <h5>Fill in  Necessary Details Here</h5><hr>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label>Your Occupation</label>
+                                    <input class="form-control" type="text" name="occupation" placeholder="Occupation" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Your Net Worth</label>
+                                    <input class="form-control" min="1" type="number" name="netWorth" placeholder="Your Net Worth" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label>Natoinal ID</label>
+                                    <input class="form-control" type="text" name="nationalID" placeholder="National Identification" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Age</label>
+                                    <input class="form-control" min="1" type="number" name="age" placeholder="Age" required>
+                                </div>
+                            </div>
+
                             <hr>
                             <div class="row mb-4">
                                 <div class="col-md-6">

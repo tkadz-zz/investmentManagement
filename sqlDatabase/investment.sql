@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 21, 2023 at 03:50 PM
+-- Generation Time: May 29, 2023 at 02:19 PM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -57,10 +57,37 @@ CREATE TABLE `docs` (
   `userID` int(11) NOT NULL,
   `iuID` varchar(225) NOT NULL,
   `title` varchar(225) NOT NULL,
+  `occupation` varchar(225) NOT NULL,
+  `netWorth` int(11) NOT NULL,
+  `nationalID` varchar(225) NOT NULL,
+  `age` int(11) NOT NULL,
   `description` text NOT NULL,
   `source` varchar(225) NOT NULL,
   `ext` varchar(225) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `interest`
+--
+
+CREATE TABLE `interest` (
+  `id` int(11) NOT NULL,
+  `type` varchar(225) NOT NULL,
+  `percentage` int(11) NOT NULL,
+  `period` int(11) NOT NULL,
+  `lastUpdated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `interest`
+--
+
+INSERT INTO `interest` (`id`, `type`, `percentage`, `period`, `lastUpdated`) VALUES
+(1, 'short', 15, 3, '2023-04-24 15:15:42'),
+(2, 'medium', 30, 6, '2023-04-24 13:08:00'),
+(3, 'long', 50, 12, '2023-04-24 13:08:04');
 
 -- --------------------------------------------------------
 
@@ -78,6 +105,13 @@ CREATE TABLE `invested` (
   `lastUpdated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `invested`
+--
+
+INSERT INTO `invested` (`id`, `userID`, `iuID`, `amount`, `withdrawInit`, `dateAdded`, `lastUpdated`, `status`) VALUES
+(16, 47, 'pVbgknIgLSqK', 12000, '2023-05-14 20:34:50', '2023-05-14 20:34:50', '2023-05-14 18:34:50', 1);
 
 -- --------------------------------------------------------
 
@@ -103,7 +137,8 @@ CREATE TABLE `investments` (
 --
 
 INSERT INTO `investments` (`id`, `iuID`, `name`, `type`, `description`, `category`, `returns`, `dateAdded`, `lastUpdated`, `status`) VALUES
-(12, 'u5qncJ4Ff6aH', 'Anu Investment', 'short', 'Investment Description here', 'clothing', 10000, '2023-07-11 14:34:24', '2023-07-11 12:37:27', 1);
+(12, 'u5qncJ4Ff6aH', 'Anu Investment', 'long', 'Investment Description here', 'clothing', 10000, '2023-07-11 14:34:24', '2023-04-21 15:49:58', 1),
+(13, 'pVbgknIgLSqK', 'Execure Snears', 'short', 'h4343h3434hstgtbzfhbzhbtynu', 'Fashion', 10000, '2023-04-21 17:50:57', '2023-04-24 13:34:00', 1);
 
 -- --------------------------------------------------------
 
@@ -224,6 +259,12 @@ ALTER TABLE `docs`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `interest`
+--
+ALTER TABLE `interest`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `invested`
 --
 ALTER TABLE `invested`
@@ -281,19 +322,25 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `docs`
 --
 ALTER TABLE `docs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `interest`
+--
+ALTER TABLE `interest`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `invested`
 --
 ALTER TABLE `invested`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `investments`
 --
 ALTER TABLE `investments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `investor`
@@ -305,13 +352,13 @@ ALTER TABLE `investor`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -323,7 +370,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `withdraw`
 --
 ALTER TABLE `withdraw`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
