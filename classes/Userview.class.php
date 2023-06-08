@@ -3,6 +3,47 @@
 class Userview extends Users
 {
 
+    public function viewBankBalanceCount($userID){
+        $rows = $this->GetBankByUserID($userID);
+        if(count($rows) > 0){
+            echo $rows[0]['balance'];
+        }else{
+            ?> <span style="font-size: 18px" class="fa badge bg-danger shadow-sm -text-warning"><b>Bank Not Active</b></span> <?php
+        }
+    }
+
+    public function topupform($userID){
+        $rows = $this->GetBankByUserID($userID);
+        if(count($rows) > 0){
+        ?>
+            <div class="p-4">
+                <form method="POST" action="includes/topUpBalance.inc.php">
+                    <label class="form-check-label">Amount</label>
+                    <br>
+                    <div class="col-md-6 align-items-center">
+                        <input name="balance" class="form-control" type="number" step="0.01" min="0.00" value="<?= $rows[0]['balance'] ?>" required>
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-outline-primary" name="btn_topUpBalance">Update</button>
+                </form>
+            </div>
+        <?php
+        }
+        else{
+            ?>
+            <div class="pb-4 text-center">
+                <br>
+                <br>
+                <label class="form-check-label">Looks like you don't have your bank account activated, Activat now</label>
+                <br>
+                <br>
+                <a class="btn -btn-sm btn-outline-primary" href="includes/activateBank.inc.php?activateBank">Activate</a>
+            </div>
+            <?php
+
+        }
+    }
+
     public function viewSetRates($type){
         $rows = $this->GetInterestRatesByType($type);
         foreach ($rows as $row){
@@ -599,7 +640,7 @@ class Userview extends Users
                     <div class="col-md-12">
                         <label for="inputEmail4" class="col-form-label">Investment Amount</label>
                         <input name="iuID" value="<?php echo $iuID ?>" hidden>
-                        <input name="amount" type="number" min="<?php echo $min ?>"  class="form-control" placeholder="Amount you wish to invest" required">
+                        <input name="amount" type="number" step="0.01" min="0.00"  class="form-control" placeholder="Amount you wish to invest" required">
                     </div>
                 </div>
 
@@ -618,6 +659,7 @@ class Userview extends Users
         $docRows = $this->GetDocs($rows[0]['iuID'], $rows[0]['userID']);
         $investorRows = $this->GetInvestorByID($rows[0]['userID']);
         $investmentRows = $this->GetAllInvestmentsByuiID($rows[0]['iuID']);
+        $bankRows = $this->GetBankByUserID($rows[0]['userID']);
 
         if($rows[0]['response'] == 0){
             $re = 'Pending';
@@ -641,12 +683,21 @@ class Userview extends Users
                         <hr>
                         <div class="pb-3" style="font-size: 13px"><strong>Investment ID: </strong><span><a href="invetsmentDetails.php?iuID=<?php echo $rows[0]['iuID'] ?>"><?php echo $rows[0]['iuID'] ?></a></span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Request From: </strong><span><a href="userProfile.php?userID=<?php echo $rows[0]['userID'] ?>"><?php echo $investorRows[0]['name'] .' '. $investorRows[0]['surname'] ?></a></span></div>
-                        <div class="pb-3" style="font-size: 13px"><strong>National ID: </strong><span><?= $docRows[0]['nationalID'] ?></span></div>
-                        <div class="pb-3" style="font-size: 13px"><strong>Occupation: </strong><span><span><?= $docRows[0]['occupation'] ?></span></div>
-                        <div class="pb-3" style="font-size: 13px"><strong>Age: </strong><span></span><span><?= $docRows[0]['age'] ?></div>
-                        <div class="pb-3" style="font-size: 13px"><strong>Net Worth: </strong><span><span><?= $docRows[0]['netWorth'] ?></span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Requested On: </strong><span><?php echo $this->dateToDay($rows[0]['dateAdded'] ) ?> (<?php echo $this->timeAgo($rows[0]['dateAdded']) ?>)</span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Request Status: </strong><span class="badge badge-<?php echo $badge ?>"><?php echo $re ?></span></div>
+                        <div class="pb-3" style="font-size: 13px"><strong>Current Bank Balance: </strong>
+                            <span>
+                                <?php
+                                if(count($bankRows) < 1){
+                                    ?>
+                                    Bank Not Activated
+                                    <?php
+                                }else{
+                                    echo '$'. $bankRows[0]['balance'];
+                                }
+                                ?>
+                            </span>
+                        </div>
                         <div class="pb-3" style="font-size: 13px"><strong>Date Responded: </strong>
                             <span>
                                 <?php

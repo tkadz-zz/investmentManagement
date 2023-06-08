@@ -26,6 +26,14 @@
             </div>
         </li>
 
+        <li class="nav-item nav-category">Bank</li>
+        <li class="nav-item">
+            <a class="nav-link" href="bank.php">
+                <i class="menu-icon mdi mdi-cash-usd"></i>
+                <span class="menu-title">Balance</span>
+            </a>
+        </li>
+
         <li class="nav-item nav-category">help</li>
         <li class="nav-item">
             <a class="nav-link" href="../unauthorized.php">

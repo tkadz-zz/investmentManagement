@@ -3,6 +3,36 @@
 
 class Users extends Dbh{
 
+
+    protected function topUpBalance($balance, $userID){
+        $sql = "UPDATE bank SET balance=? WHERE userID=?";
+        $stmt = $this->con()->prepare($sql);
+        if($stmt->execute([$balance, $userID])){
+            $_SESSION['type'] = 's';
+            $_SESSION['err'] =' Bank Balance Updated.';
+            echo "<script type='text/javascript'>;
+                      window.location='../bank.php';
+                    </script>";
+        }else{
+            $this->opps();
+        }
+    }
+
+    protected function activateBank($userID){
+        $initialBalance = 0;
+        $sql = "INSERT INTO bank (userID, balance) VALUES (?,?)";
+        $stmt = $this->con()->prepare($sql);
+        if(!$stmt->execute([$userID, $initialBalance])){
+            $this->opps();
+        }else{
+            $_SESSION['type'] = 's';
+            $_SESSION['err'] = 'Bank Account is now active,Please top up your balance';
+            echo "<script type='text/javascript'>;
+                      window.location='../bank.php';
+                    </script>";
+        }
+    }
+
     protected function upateRates($type, $percentage, $period){
         $sql = "UPDATE interest SET percentage=?, period=? WHERE type=?";
         $stmt = $this->con()->prepare($sql);
@@ -222,24 +252,49 @@ class Users extends Dbh{
     }
 
     protected function invest($amount, $iuID, $userID){
-        $today = date('Y-m-d H:i:s');
-        $status=1;
-        $sql = "INSERT INTO invested(userID, iuID, amount, withdrawInit, dateAdded, status) VALUES (?,?,?,?,?,?)";
-        $stmt = $this->con()->prepare($sql);
 
-        $sql1 = "DELETE FROM request WHERE userID=? AND iuID=?";
-        $stmt1 = $this->con()->prepare($sql1);
-
-
-        if($stmt->execute([$userID, $iuID, $amount, $today, $today, $status]) AND $stmt1->execute([$userID, $iuID])){
-            $_SESSION['type'] = 's';
-            $_SESSION['err'] = 'Investment of $'.$amount.' to Investment ID '.$iuID.' was Successful';
+        $bankRows = $this->GetBankByUserID($userID);
+        if(count($bankRows) < 1){
+            $_SESSION['type'] = 'w';
+            $_SESSION['err'] = 'Please Activate Your Bank Account';
             echo "<script type='text/javascript'>;
                       window.location='../invetsmentDetails.php?iuID=$iuID';
                     </script>";
-        }
-        else{
-            $this->opps();
+        }else {
+
+            if($bankRows[0]['balance'] < $amount){
+                $balance = $bankRows[0]['balance'];
+                $_SESSION['type'] = 'i';
+                $_SESSION['err'] = 'You have insufficient funds in your bank account to invest.Your current balance is $'.$balance.' .Please adjust your investment amount or top up you bank account';
+                echo "<script type='text/javascript'>;
+                      window.location='../invetsmentDetails.php?iuID=$iuID';
+                    </script>";
+            }else {
+                $today = date('Y-m-d H:i:s');
+                $status = 1;
+                $sql = "INSERT INTO invested(userID, iuID, amount, withdrawInit, dateAdded, status) VALUES (?,?,?,?,?,?)";
+                $stmt = $this->con()->prepare($sql);
+
+                $sql1 = "DELETE FROM request WHERE userID=? AND iuID=?";
+                $stmt1 = $this->con()->prepare($sql1);
+
+                $balance = $bankRows[0]['balance'];
+                $newBalance = $balance - $amount ;
+
+                $sql2 = "UPDATE bank SET balance=? WHERE userID=?";
+                $stmt2 = $this->con()->prepare($sql2);
+                $stmt2->execute([$newBalance, $userID]);
+
+                if ($stmt->execute([$userID, $iuID, $amount, $today, $today, $status]) and $stmt1->execute([$userID, $iuID])) {
+                    $_SESSION['type'] = 's';
+                    $_SESSION['err'] = 'Investment of $' . $amount . ' to Investment ID ' . $iuID . ' was Successful. New Bank Balance is $' . $newBalance .'.' ;
+                    echo "<script type='text/javascript'>;
+                      window.location='../invetsmentDetails.php?iuID=$iuID';
+                    </script>";
+                } else {
+                    $this->opps();
+                }
+            }
         }
     }
 
@@ -697,41 +752,42 @@ class Users extends Dbh{
         }
     }
 
-    protected function addDoc($title, $description, $iuID, $userUD, $file_tmp, $file_destination, $file_name_new, $file_ext, $occupation, $netWorth, $nationalID, $age){
-        if($age < 18){
+    protected function addDoc($title, $description, $iuID, $userUD, $file_tmp, $file_destination, $file_name_new, $file_ext){
+        $bankRows = $this->GetBankByUserID($userUD);
+
+        if(count($bankRows) < 1){
             $_SESSION['type'] = 'w';
-            $_SESSION['err'] = 'Your investment Proposal has been rejected';
+            $_SESSION['err'] = 'Please Activate your bank account first';
             echo "<script>
-                    window.location='../dashboard.php';
-                </script>";
-        }
-        elseif($age >= 18){
+                window.location='../requestInvestment.php?iuID=$iuID';
+            </script>";
+        }else {
             if (move_uploaded_file($file_tmp, $file_destination)) {
                 $filed = '../documents/' . $file_name_new . '';
-                $sql = "INSERT INTO docs(title, description, iuID, userID, source, ext, occupation, netWorth, nationalID, age)
-                    VALUES(?,?,?,?,?,?,?,?,?,?)";
+                $sql = "INSERT INTO docs(title, description, iuID, userID, source, ext)
+                VALUES(?,?,?,?,?,?)";
                 $stmt = $this->con()->prepare($sql);
-                $stmt->execute([$title, $description, $iuID, $userUD, $filed, $file_ext, $occupation, $netWorth, $nationalID, $age]);
+                $stmt->execute([$title, $description, $iuID, $userUD, $filed, $file_ext]);
                 if ($stmt) {
                     $_SESSION['type'] = 's';
                     $_SESSION['err'] = 'Request Added Successfully';
                     echo "<script>
-                    window.location='../requestInvestment.php?iuID=$iuID';
-                </script>";
+                window.location='../includes/finilize.inc.php?iuID=$iuID';
+            </script>";
                 } else {
                     $_SESSION['type'] = 'w';
                     $_SESSION['err'] = 'Opps! Something went wrong while uploading the Document- level2';
                     echo "<script>
-                    history.back(-1);
-                </script>";
+                window.location='../requestInvestment.php?iuID=$iuID';
+            </script>";
                 }
             } else {
                 //Failed to move. Probably file destination permissions
                 $_SESSION['type'] = 'w';
                 $_SESSION['err'] = 'Opps! Something went wrong while uploading the Document- level1';
                 echo "<script>
-                    history.back(-1);
-                </script>";
+                window.location='../requestInvestment.php?iuID=$iuID';
+            </script>";
             }
         }
 
@@ -1030,6 +1086,13 @@ class Users extends Dbh{
         $sql = "SELECT * FROM interest";
         $stmt = $this->con()->prepare($sql);
         $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    protected function GetBankByUserID($userID){
+        $sql = "SELECT * FROM bank WHERE userID=?";
+        $stmt = $this->con()->prepare($sql);
+        $stmt->execute([$userID]);
         return $stmt->fetchAll();
     }
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 29, 2023 at 02:19 PM
+-- Generation Time: Jun 08, 2023 at 08:47 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -49,6 +49,19 @@ INSERT INTO `admin` (`id`, `userID`, `name`, `surname`, `address`, `phone`, `ema
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `bank`
+--
+
+CREATE TABLE `bank` (
+  `id` int(11) NOT NULL,
+  `userID` int(11) NOT NULL,
+  `balance` float NOT NULL,
+  `lastUpdated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `docs`
 --
 
@@ -57,10 +70,6 @@ CREATE TABLE `docs` (
   `userID` int(11) NOT NULL,
   `iuID` varchar(225) NOT NULL,
   `title` varchar(225) NOT NULL,
-  `occupation` varchar(225) NOT NULL,
-  `netWorth` int(11) NOT NULL,
-  `nationalID` varchar(225) NOT NULL,
-  `age` int(11) NOT NULL,
   `description` text NOT NULL,
   `source` varchar(225) NOT NULL,
   `ext` varchar(225) NOT NULL
@@ -99,19 +108,12 @@ CREATE TABLE `invested` (
   `id` int(11) NOT NULL,
   `userID` int(11) NOT NULL,
   `iuID` varchar(225) NOT NULL,
-  `amount` int(11) NOT NULL,
+  `amount` float NOT NULL,
   `withdrawInit` varchar(225) NOT NULL,
   `dateAdded` varchar(225) NOT NULL,
   `lastUpdated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `invested`
---
-
-INSERT INTO `invested` (`id`, `userID`, `iuID`, `amount`, `withdrawInit`, `dateAdded`, `lastUpdated`, `status`) VALUES
-(16, 47, 'pVbgknIgLSqK', 12000, '2023-05-14 20:34:50', '2023-05-14 20:34:50', '2023-05-14 18:34:50', 1);
 
 -- --------------------------------------------------------
 
@@ -253,6 +255,12 @@ ALTER TABLE `admin`
   ADD UNIQUE KEY `userID` (`userID`);
 
 --
+-- Indexes for table `bank`
+--
+ALTER TABLE `bank`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `docs`
 --
 ALTER TABLE `docs`
@@ -319,10 +327,16 @@ ALTER TABLE `admin`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `bank`
+--
+ALTER TABLE `bank`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `docs`
 --
 ALTER TABLE `docs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `interest`
@@ -334,7 +348,7 @@ ALTER TABLE `interest`
 -- AUTO_INCREMENT for table `invested`
 --
 ALTER TABLE `invested`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `investments`
@@ -358,7 +372,7 @@ ALTER TABLE `messages`
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `users`
