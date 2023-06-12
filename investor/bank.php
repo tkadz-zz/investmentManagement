@@ -81,6 +81,7 @@ include 'includes/miniTab.inc.php';
 </style>
 
 
+
 <div class="col-lg-3 col-sm-6">
     <div class="card-box bg-purple">
         <div class="inner">
@@ -100,6 +101,12 @@ include 'includes/miniTab.inc.php';
         <!--<a href="#!" data-bs-toggle="modal" data-bs-target="#topupModal" class="card-box-footer">Top Up <i class="fa fa-plus-circle"></i></a>-->
     </div>
 </div>
+
+<br>
+<?php
+$n = new Userview();
+$n->viewTempActivateBankAccount($_SESSION['id']);
+?>
 
 <div class="modal fade" id="topupModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-full -modal-xl">

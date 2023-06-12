@@ -3,6 +3,15 @@
 class Userview extends Users
 {
 
+    public function viewTempActivateBankAccount($userID){
+        $rows = $this->GetBankByUserID($userID);
+        if(count($rows) < 1 ) {
+            ?>
+            <a class="btn btn-sm btn-outline-primary" href="includes/activateBank.inc.php?userID=<?= $userID ?>&activateBank">Activate Bank</a>
+            <?php
+        }
+    }
+
     public function viewBankBalanceCount($userID){
         $rows = $this->GetBankByUserID($userID);
         if(count($rows) > 0){

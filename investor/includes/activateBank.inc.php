@@ -4,7 +4,7 @@ include("autoloader.inc.php");
 
 if(isset($_GET['activateBank'])){
 
-    $userID = $_SESSION['id'];
+    $userID = $_GET['userID'];
 
     try {
         $n = new Usercontr();
