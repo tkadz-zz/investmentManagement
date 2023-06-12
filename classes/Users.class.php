@@ -11,7 +11,7 @@ class Users extends Dbh{
             $_SESSION['type'] = 's';
             $_SESSION['err'] =' Bank Balance Updated.';
             echo "<script type='text/javascript'>;
-                      window.location='../bank.php';
+                      history.back(-1);
                     </script>";
         }else{
             $this->opps();
@@ -26,9 +26,9 @@ class Users extends Dbh{
             $this->opps();
         }else{
             $_SESSION['type'] = 's';
-            $_SESSION['err'] = 'Bank Account is now active,Please top up your balance';
+            $_SESSION['err'] = 'Bank Account is now active,Please top up balance';
             echo "<script type='text/javascript'>;
-                      window.location='../bank.php';
+                      history.back(-1);
                     </script>";
         }
     }
@@ -240,9 +240,16 @@ class Users extends Dbh{
         $sql2  = "DELETE FROM invested WHERE userID=? AND iuID=?";
         $stmt2 = $this->con()->prepare($sql2);
 
+        $bankRows = $this->GetBankByUserID($userID);
+        $balance = $bankRows[0]['balance'];
+        $newBalance = $balance + $amount;
+        $sqlBank = "UPDATE bank SET balance=? WHERE userID=?";
+        $stmtBank = $this->con()->prepare($sqlBank);
+        $stmtBank->execute([$newBalance, $userID]);
+
         if($stmt->execute([$userID, $iuID, $amount, $today]) AND $stmt1->execute([$today, $userID, $iuID]) AND $stmt2->execute([$userID, $iuID])){
             $_SESSION['type'] = 's';
-            $_SESSION['err'] = 'Withdrawal of $'.$amount.' on Investment ID '.$iuID.' was Successful';
+            $_SESSION['err'] = 'Withdrawal of $'.$amount.' on Investment ID '.$iuID.' was Successful. New Bank Balance is $'.$newBalance.'.';
             echo "<script type='text/javascript'>;
                       window.location='../invetsmentDetails.php?iuID=$iuID';
                     </script>";

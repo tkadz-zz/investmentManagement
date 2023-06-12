@@ -15,10 +15,11 @@ class Userview extends Users
     public function topupform($userID){
         $rows = $this->GetBankByUserID($userID);
         if(count($rows) > 0){
-        ?>
+            ?>
             <div class="p-4">
                 <form method="POST" action="includes/topUpBalance.inc.php">
                     <label class="form-check-label">Amount</label>
+                    <input value="<?= $userID ?>" name="userID" hidden>
                     <br>
                     <div class="col-md-6 align-items-center">
                         <input name="balance" class="form-control" type="number" step="0.01" min="0.00" value="<?= $rows[0]['balance'] ?>" required>
@@ -27,7 +28,7 @@ class Userview extends Users
                     <button type="submit" class="btn btn-outline-primary" name="btn_topUpBalance">Update</button>
                 </form>
             </div>
-        <?php
+            <?php
         }
         else{
             ?>
@@ -37,7 +38,7 @@ class Userview extends Users
                 <label class="form-check-label">Looks like you don't have your bank account activated, Activat now</label>
                 <br>
                 <br>
-                <a class="btn -btn-sm btn-outline-primary" href="includes/activateBank.inc.php?activateBank">Activate</a>
+                <a class="btn -btn-sm btn-outline-primary" href="includes/activateBank.inc.php?userID=<?= $userID ?>&activateBank">Activate</a>
             </div>
             <?php
 
@@ -89,25 +90,25 @@ class Userview extends Users
         ?>
         <label  -class="col-form-label">Investments Limits</label>
         <table -id="datatable" class="table -table-bordered -dt-responsive -nowrap">
-        <thead>
-        <tr>
-            <th></th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-        foreach ($rows as $row){
-        ?>
+            <thead>
             <tr>
-                <td><strong><?= $row['type'] ?></strong></td>
-                <td><?= $row['percentage'] ?>% / <?= $row['period'] ?> months <span class="mdi mdi-arrow-up"></span></td>
+                <th></th>
+                <th></th>
             </tr>
+            </thead>
+            <tbody>
+            <?php
+            foreach ($rows as $row){
+                ?>
+                <tr>
+                    <td><strong><?= $row['type'] ?></strong></td>
+                    <td><?= $row['percentage'] ?>% / <?= $row['period'] ?> months <span class="mdi mdi-arrow-up"></span></td>
+                </tr>
 
-        <?php
-        }
-        ?>
-        </tbody>
+                <?php
+            }
+            ?>
+            </tbody>
         </table>
         <?php
     }
@@ -626,6 +627,12 @@ class Userview extends Users
         $rows = $this->GetAllInvestmentsByuiID($iuID);
         $percentageRows = $this->GetInterestRatesByType($rows[0]['type']);
         $min = 1;
+        $bankRows = $this->GetBankByUserID($_SESSION['id']);
+        if(count($bankRows) < 1){
+            $balance = 'Bank Inactive';
+        }else{
+            $balance = $bankRows[0]['balance'];
+        }
         ?>
         <form method="post" action="includes/invest.inc.php">
             <div class="modal-body">
@@ -636,18 +643,24 @@ class Userview extends Users
                         ?>
                     </div>
                 </div>
+                <br>
                 <div class="row">
+                    <div class="col-md-12">
+                        Current Bank Balance: $<?= $balance ?>
+                    </div>
+                    <br>
+                    <br>
                     <div class="col-md-12">
                         <label for="inputEmail4" class="col-form-label">Investment Amount</label>
                         <input name="iuID" value="<?php echo $iuID ?>" hidden>
-                        <input name="amount" type="number" step="0.01" min="0.00"  class="form-control" placeholder="Amount you wish to invest" required">
+                        <input name="amount" type="number" step="0.01" min="0.01"  class="form-control" placeholder="Amount you wish to invest" required">
                     </div>
                 </div>
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button name="btn_addUser" type="submit"  class="btn btn-primary">Save changes</button>
+                <button name="btn_addUser" type="submit"  class="btn btn-primary">Invest</button>
             </div>
         </form>
         <?php
@@ -798,7 +811,7 @@ class Userview extends Users
                 <td><span class="badge badge-<?php echo $badge ?>"><?php echo $re ?></span></td>
                 <td>
                     <?php if($_SESSION['role'] == 'admin'){ ?>
-                    <a href="requestDetails.php?rID=<?php echo $row['id'] ?>">More <span class="mdi mdi-arrow-right"></span></a>
+                        <a href="requestDetails.php?rID=<?php echo $row['id'] ?>">More <span class="mdi mdi-arrow-right"></span></a>
                     <?php } ?>
                 </td>
             </tr>
@@ -864,18 +877,18 @@ class Userview extends Users
         $percentageRows = $this->GetInterestRatesByType($InvType);
         $period = $percentageRows[0]['period'] * 30;
 
-       /* if($InvType == 'short'){
-            //90 days OR 3 months
-            $period = 90;
-        }
-        elseif($InvType == 'medium'){
-            //180 days OR 6 months
-            $period = 180;
-        }
-        elseif($InvType == 'long'){
-            //365 days OR 12 months OR 1 year
-            $period = 365;
-        }*/
+        /* if($InvType == 'short'){
+             //90 days OR 3 months
+             $period = 90;
+         }
+         elseif($InvType == 'medium'){
+             //180 days OR 6 months
+             $period = 180;
+         }
+         elseif($InvType == 'long'){
+             //365 days OR 12 months OR 1 year
+             $period = 365;
+         }*/
 
         $withdrwalDate =  date('Y-m-d', strtotime($rows[0]['withdrawInit']. ' + '.$period.' days'));
 
@@ -2080,7 +2093,7 @@ class Userview extends Users
         <div class="container card-body card grid-margin stretch-card rounded bg-white mt-4 mb-4">
             <div class="row">
 
-                <div class="col-md-12 border-right">
+                <div class="col-md-6 border-right">
                     <div class="d-flex flex-column align-items-center text-center p-3 py-5">
 
                         <div class="pb-3" style="font-size: 13px"><strong>Full Name: </strong><span><?php echo $userRows[0]['name'] .' '. $userRows[0]['surname'] ?></span></div>
@@ -2089,14 +2102,132 @@ class Userview extends Users
                         <div class="pb-3" style="font-size: 13px"><strong>Phone Number: </strong><span><?php echo $userRows[0]['phone'] ?></span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Address: </strong><span><?php echo $userRows[0]['address'] ?></span></div>
                         <div class="pb-3" style="font-size: 13px"><strong>Date Joined: </strong><span>Joined: <?php echo $this->dateTimeToDay($rows[0]['joined']) ?> (<?php echo $this->timeAgo($rows[0]['joined']) ?>)</span></div>
+                        <hr>
                         <div>
                             <a href="messages.php?userID=<?= $id ?>&activeID=<?= $_SESSION['id'] ?>"><span class="fa fa-comment"> MESSAGE</span></a>
                         </div>
                     </div>
 
 
+
                     <a onclick="return confirm('Are you sure you want to reset user password?')" href="includes/resetUserPassword.inc.php?userID=<?php echo $id ?>" class="btn btn-outline-primary"> Reset User Password</a>
 
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <style>
+                        .card-box {
+                            position: relative;
+                            color: #fff;
+                            padding: 20px 10px 40px;
+                            margin: 20px 0px;
+                        }
+                        .card-box:hover {
+                            text-decoration: none;
+                            color: #f1f1f1;
+                        }
+                        .card-box:hover .icon i {
+                            font-size: 100px;
+                            transition: 1s;
+                            -webkit-transition: 1s;
+                        }
+                        .card-box .inner {
+                            padding: 5px 10px 0 10px;
+                        }
+                        .card-box h3 {
+                            font-size: 27px;
+                            font-weight: bold;
+                            margin: 0 0 8px 0;
+                            white-space: nowrap;
+                            padding: 0;
+                            text-align: left;
+                        }
+                        .card-box p {
+                            font-size: 15px;
+                        }
+                        .card-box .icon {
+                            position: absolute;
+                            top: auto;
+                            bottom: 5px;
+                            right: 5px;
+                            z-index: 0;
+                            font-size: 72px;
+                            color: rgba(0, 0, 0, 0.15);
+                        }
+                        .card-box .card-box-footer {
+                            position: absolute;
+                            left: 0px;
+                            bottom: 0px;
+                            text-align: center;
+                            padding: 3px 0;
+                            color: rgba(255, 255, 255, 0.8);
+                            background: rgba(0, 0, 0, 0.1);
+                            width: 100%;
+                            text-decoration: none;
+                        }
+                        .card-box:hover .card-box-footer {
+                            background: rgba(0, 0, 0, 0.3);
+                        }
+                        .bg-blue {
+                            background-color: #00c0ef !important;
+                        }
+                        .bg-green {
+                            background-color: #00a65a !important;
+                        }
+                        .bg-orange {
+                            background-color: #f39c12 !important;
+                        }
+                        .bg-red {
+                            background-color: #d9534f !important;
+                        }
+                        .bg-purple {
+                            background-color: #aa35b2 !important;
+                        }
+                        .bg-lime {
+                            background-color: rgba(50, 56, 55, 0.98) !important;
+                        }
+
+                    </style>
+
+
+                    <div class="col-md-6">
+                        <div class="card-box bg-purple">
+                            <div class="inner">
+                                <h3>
+                                    <span -style="font-size: 15px" -class="mdi mdi-cash-plus">
+                                        $<?php
+                                        $n = new Userview();
+                                        $n->viewBankBalanceCount($id);
+                                        ?>
+                                    </span>
+                                </h3>
+                                <p> Balance Balance</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-user" aria-hidden="true"></i>
+                            </div>
+                            <a href="#!" data-bs-toggle="modal" data-bs-target="#topupModal" class="card-box-footer">Top Up <i class="fa fa-plus-circle"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="topupModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-full -modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Top Up Balance</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div>
+                                    <?php
+                                    $n = new Userview();
+                                    $n->topupform($id);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

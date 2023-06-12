@@ -97,7 +97,7 @@ include 'includes/miniTab.inc.php';
         <div class="icon">
             <i class="fa fa-user" aria-hidden="true"></i>
         </div>
-        <a href="#!" data-bs-toggle="modal" data-bs-target="#topupModal" class="card-box-footer">Top Up <i class="fa fa-plus-circle"></i></a>
+        <!--<a href="#!" data-bs-toggle="modal" data-bs-target="#topupModal" class="card-box-footer">Top Up <i class="fa fa-plus-circle"></i></a>-->
     </div>
 </div>
 
